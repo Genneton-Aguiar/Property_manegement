@@ -61,7 +61,7 @@ class Property(models.Model):
     )
     user = models.ForeignKey(
         Users, 
-        verbose_name="Usuario",
+        verbose_name="proprietario",
         on_delete=models.DO_NOTHING
         )
     
@@ -129,7 +129,7 @@ class Contratcs(models.Model):
         on_delete=models.DO_NOTHING
     )
     validity = models.DateField(
-        verbose_name="Validade", 
+        verbose_name="vigencia do contrato", 
         default=timezone.now
     )
     start_date = models.DateField(
@@ -141,7 +141,7 @@ class Contratcs(models.Model):
         default=timezone.now
     ) 
     adjustments= models.FloatField(
-        verbose_name="Ajustes previstos", 
+        verbose_name="reajustes previstos", 
         default=0
     )
     is_active= models.BooleanField(
@@ -160,30 +160,9 @@ class Contratcs(models.Model):
         verbose_name="inadimplente",
         default=False
     )
-    
-    
-    def __str__(self):
-        return self.user
-    
-    
-class Tenants(models.Model):
-    
-    user = models.ForeignKey(
-        Users, 
-        verbose_name="inquilino",
-        on_delete=models.DO_NOTHING
-        )
-    
-    contract= models.ForeignKey(
-        Contratcs, 
-        verbose_name="Contrato",
-        on_delete=models.DO_NOTHING
-        )
-    
-    property = models.ForeignKey(
-        Property, 
-        verbose_name="Imovel",
-        on_delete=models.DO_NOTHING
+    date_limit = models.DateField(
+        verbose_name="Data limite de pagamento", 
+        default=timezone.now
     )
     
     def __str__(self):
@@ -209,24 +188,27 @@ class Payments(models.Model):
     )
 
     def __str__(self):
-        return self.contratc
+        return self.contratc    
     
     
-class Owner (models.Model):
-
+class Repasse (models.Model):
+    
     user = models.ForeignKey(
-        Users,
+        Users, 
         verbose_name="proprietario",
         on_delete=models.DO_NOTHING
-    )
-    
-    payment= models.ForeignKey(
-        Payments,
-        verbose_name="pagamento",
+        )
+    Payments = models.ForeignKey(
+        Payments, 
+        verbose_name="Pagamento",
         on_delete=models.DO_NOTHING
     )
-
+  
     def __str__(self):
         return self.user
     
+    
+
+    
+
 

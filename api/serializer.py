@@ -16,18 +16,16 @@ class ContratcsSerializer(serializers.ModelSerializer):
         model = Contratcs
         fields = '__all__'  
 
-class TenantsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tenants
-        fields = '__all__'
         
 class PaymentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payments
         fields = '__all__'
 
-class OwnerSerializer(serializers.ModelSerializer):
+class RepasseSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Owner
+        model = Repasse
         fields = '__all__'
+        
+
         
