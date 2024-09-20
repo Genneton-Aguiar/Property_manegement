@@ -12,19 +12,21 @@ class PropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = Property
         fields =  ('id','user_id', 'name', 'address', 'property_type', 
-                   'room_number', 'parking_space', 'rental_value', 'avaliable',
+                   'room_number', 'parking_space', 'avaliable',
                    'rented', 'maintenance')
 
-class ContratcsSerializer(serializers.ModelSerializer):
+class ContractsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Contratcs
-        fields = '__all__'  
-
+        model = Contracts
+        fields = ('id', 'user_id', 'property_id', 'validity', 'start_date', 
+                  'end_date', 'rental_value', 'adjustments', 'is_active', 
+                  'compliant', 'defaulter')
         
 class PaymentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payments
-        fields = '__all__'
+        fields = ('id', 'contratc_id', 'payed', 'payment_type',
+                  'value_payed', 'date')
 
 class RepasseSerializer(serializers.ModelSerializer):
     class Meta:

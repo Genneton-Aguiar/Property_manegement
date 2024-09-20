@@ -21,21 +21,22 @@ class UsersViewSet(viewsets.ModelViewSet):
     
     def list (self, request, *args, **kwargs):
         
-        user = Users.objects.filter(pk = request.user.id).first()
+        '''user = Users.objects.filter(pk = request.user.id).first()
         
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
                 'Desculpe, apenas administradores podem listar usuarios',
                 status = HTTP_400_BAD_REQUEST
-            )
+            )'''
         
-        users= Users.objects.filter(is_active=True)
+        users = Users.objects.filter(is_active=True)
+        
         users = filter_users(users, request)
-        
+ 
         serializer = UsersSerializer(users, many=True)
         return Response(serializer.data, status=HTTP_200_OK)
             
-    
+
     def create (self, request, *args, **kwargs):
         
         user = Users.objects.filter(pk = request.user.id).first()
@@ -108,12 +109,12 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     def list (self, request, *args, **kwargs):
         
-        user = Users.objects.filter(pk = request.user.id).first()
+        '''user = Users.objects.filter(pk = request.user.id).first()
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
                 'Desculpe, apenas administradores podem LISTAR PROPERTYS',
                 status = HTTP_400_BAD_REQUEST
-            )
+            )'''
 
         property = Property.objects.all()
 
@@ -153,7 +154,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         data=request.data 
         if not data:
             return Response(
-                'informe os dados do evento', 
+                'informe os dados da propriedade', 
                 status=HTTP_400_BAD_REQUEST
                 )
             
@@ -204,5 +205,160 @@ class PropertyViewSet(viewsets.ModelViewSet):
       
         return Response([], status = HTTP_204_NO_CONTENT)
 
+
+class ContractsViewSet(viewsets.ModelViewSet):
+    queryset = Contracts.objects.all()
+    serializer_class = ContractsSerializer
+
+    def list (self, request, *args, **kwargs):
+        
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem deletar usuarios',
+                status = HTTP_400_BAD_REQUEST
+            )'''
+        
+        contracts= Contracts.objects.all()
+        
+        contracts= filter_contracts(contracts, request)
+                        
+        serializer = ContractsSerializer(contracts, many=True)
+        return Response(serializer.data, status=HTTP_200_OK)
+            
+    def create(self, request, *args, **kwargs):
+        
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem CRIAR PROPERTYS',
+                status = HTTP_400_BAD_REQUEST
+            )'''
+
+        data=request.data 
+        if not data:
+            return Response(
+                'informe os dados do contrato', 
+                status=HTTP_400_BAD_REQUEST
+                )
+            
+        contract = create_contract(data)
+
+        serializer = self.get_serializer(contract)
+        headers = self.get_success_headers(serializer.data)
+        
+        return Response(
+            serializer.data,
+            status=HTTP_201_CREATED,
+            headers=headers
+            )
+
+    def partial_update(self, request, pk):
+        
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem deletar usuarios',
+                status = HTTP_400_BAD_REQUEST
+            )'''
+
+        try:
+            property = Property.objects.get(pk=pk)
+            data = request.data
+            
+            serializer = PropertySerializer(property, data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=HTTP_200_OK)
+                
+        except Exception as e:
+            return Response(e, status=HTTP_400_BAD_REQUEST)
+        
+    def destroy(self, request, **kwargs):
+        
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem deletar usuarios',
+                status = HTTP_400_BAD_REQUEST
+            )'''
+            
+        contract = self.get_object()
+        contract.is_active=False
+        contract.save()
+        
+        
+        return Response([], status = HTTP_204_NO_CONTENT)
     
     
+class PaymentsViewSet(viewsets.ModelViewSet):
+    queryset = Payments.objects.all()
+    serializer_class = PaymentsSerializer
+
+    def list (self, request, *args, **kwargs):    
+
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem deletar usuarios',  
+                status = HTTP_400_BAD_REQUEST
+            )'''
+
+        payments= Payments.objects.all()
+            
+        serializer = PaymentsSerializer(payments, many=True)
+        return Response(serializer.data, status=HTTP_200_OK)
+    
+    def create(self, request, *args, **kwargs):
+
+
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem LISTAR PROPERTYS',
+                status = HTTP_400_BAD_REQUEST
+            )'''
+        
+        data=request.data 
+        if not data:
+            return Response(
+                'informe os dados do pagamento', 
+                status=HTTP_400_BAD_REQUEST
+                )
+            
+        payment = create_payment(data)
+
+        serializer = self.get_serializer(payment)
+        headers = self.get_success_headers(serializer.data)
+        
+        return Response(
+            serializer.data,
+            status=HTTP_201_CREATED,
+            headers=headers
+            )
+
+    
+    def paginate_queryset(self, queryset):
+        
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem LISTAR PROPERTYS',
+                status = HTTP_400_BAD_REQUEST
+            )'''
+
+        return super().paginate_queryset(queryset)
+    
+    
+    def destroy(self, request, *args, **kwargs):
+        
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem LISTAR PROPERTYS',
+                status = HTTP_400_BAD_REQUEST
+            )'''
+
+        return super().destroy(request, *args, **kwargs)
+

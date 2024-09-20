@@ -83,10 +83,7 @@ class Property(models.Model):
         verbose_name = "Vagas de estacionamento", 
         default = 1
     )
-    rental_value = models.FloatField(
-        verbose_name = "Valor de aluguel", 
-        default = 0
-    )
+    
     avaliable = models.BooleanField(
         verbose_name = "Disponível", 
         default = True
@@ -104,11 +101,11 @@ class Property(models.Model):
         return self.name
     
 
-class Contratcs(models.Model):
+class Contracts(models.Model):
     
     user = models.ForeignKey(
         Users, 
-        verbose_name = "Usuario",
+        verbose_name = "inquilino",
         on_delete = models.DO_NOTHING
         )
     property = models.ForeignKey(
@@ -116,9 +113,9 @@ class Contratcs(models.Model):
         verbose_name ="Imovel",
         on_delete = models.DO_NOTHING
     )
-    validity = models.DateField(
+    validity = models.CharField(
         verbose_name = "vigencia do contrato", 
-        default = timezone.now
+        max_length = 100
     )
     start_date = models.DateField(
         verbose_name = "Data de inicio", 
@@ -130,7 +127,8 @@ class Contratcs(models.Model):
     ) 
     adjustments = models.FloatField(
         verbose_name = "reajustes previstos", 
-        default = 0
+        default = 0,
+        null=True
     )
     is_active = models.BooleanField(
         verbose_name = "contrato encerrado", 
@@ -151,6 +149,10 @@ class Contratcs(models.Model):
     date_limit = models.DateField(
         verbose_name = "Data limite de pagamento", 
         default = timezone.now
+    )
+    rental_value = models.FloatField(
+        verbose_name = "Valor de aluguel", 
+        default = 0
     )
     
     def __str__(self):
@@ -173,10 +175,16 @@ class Payments(models.Model):
         default=BOLETO
     )
     
-    contratc= models.ForeignKey(
-        Contratcs, 
-        verbose_name="tipo de pagamento",
-        on_delete=models.DO_NOTHING
+    payed = models.BooleanField(
+        verbose_name="Pagamento efetuado?", 
+        default=False
+    )
+    
+    contract= models.ForeignKey(
+        Contracts, 
+        verbose_name="contrato",
+        on_delete=models.DO_NOTHING,
+        default=''
         )
     
     value_payed = models.FloatField(
