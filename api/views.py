@@ -39,13 +39,12 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     def create (self, request, *args, **kwargs):
         
-        user = Users.objects.filter(pk = request.user.id).first()
-        
+        '''user = Users.objects.filter(pk = request.user.id).first()
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
                 'Desculpe, apenas administradores podem criar usuarios',
                 status = HTTP_400_BAD_REQUEST
-            )
+            )'''
         
         data = request.data
         if not data:
@@ -110,27 +109,16 @@ class PropertyViewSet(viewsets.ModelViewSet):
     def list (self, request, *args, **kwargs):
         
         '''user = Users.objects.filter(pk = request.user.id).first()
-        if not request.user.is_authenticated or not user.is_admin:
+        if not request.user.is_authenticated or (not user.is_admin 
+            and not user.is_manager and not user.is_operator):
             return Response(
-                'Desculpe, apenas administradores podem LISTAR PROPERTYS',
+                'Apenas ADMINISTRADORES e GESTORES podem LISTAR PROPERTYS',
                 status = HTTP_400_BAD_REQUEST
             )'''
 
         property = Property.objects.all()
 
-        for params in [
-            'avaliable',
-            'rented',
-            'maintenance'
-            ]:
-            value = request.GET.get(params)
-            if value is not None: 
-                if value.lower() == 'true':  
-                    property = property.filter(**{params: True})
-                    
-        property_type = request.GET.get('property_type')
-        if property_type:
-                property = property.filter(property_type=property_type)
+        property = filter_property(property, request)
         
         serializer = self.get_serializer(property, many=True)
         headers = self.get_success_headers(serializer.data)
@@ -144,12 +132,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
         
     def create (self, request, *args, **kwargs):
         
-        user = Users.objects.filter(pk = request.user.id).first()
-        if not request.user.is_authenticated or not user.is_admin:
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or (not user.is_admin 
+            and not user.is_manager):
             return Response(
-                'Desculpe, apenas administradores podem CRIAR PROPERTYS',
+                'Apenas ADMINISTRADORES e GESTORES podem CRIAR PROPERTYS',
                 status = HTTP_400_BAD_REQUEST
-            )
+            )'''
 
         data=request.data 
         if not data:
@@ -171,12 +160,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
         
     def partial_update(self, request, pk):
         
-        user = Users.objects.filter(pk = request.user.id).first()
-        if not request.user.is_authenticated or not user.is_admin:
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or (not user.is_admin 
+            and not user.is_manager):
             return Response(
-                'Desculpe, apenas administradores podem EDITAR PROPERTYS',
+                'Apenas ADMINISTRADORES e GESTORES podem EDITAR PROPERTYS',
                 status = HTTP_400_BAD_REQUEST
-            )
+            )'''
 
         try:
             property = Property.objects.get(pk=pk)
@@ -194,9 +184,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
     def destroy(self, request, **kwargs):  
          
         user = Users.objects.filter(pk = request.user.id).first()
-        if not request.user.is_authenticated or not user.is_admin:
+        if not request.user.is_authenticated or (not user.is_admin 
+            and not user.is_manager):
             return Response(
-                'Desculpe, apenas administradores podem EXCLUIR PROPERTYS',
+                'Apenas ADMINISTRADORES e GESTORES podem DELETAR PROPERTYS',
                 status = HTTP_400_BAD_REQUEST
             )
             
@@ -215,7 +206,7 @@ class ContractsViewSet(viewsets.ModelViewSet):
         '''user = Users.objects.filter(pk = request.user.id).first()
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
-                'Desculpe, apenas administradores podem deletar usuarios',
+                'Apenas ADMINISTRADORES e GESTORES podem LISTAR CONTRATCS',
                 status = HTTP_400_BAD_REQUEST
             )'''
         
@@ -231,7 +222,7 @@ class ContractsViewSet(viewsets.ModelViewSet):
         '''user = Users.objects.filter(pk = request.user.id).first()
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
-                'Desculpe, apenas administradores podem CRIAR PROPERTYS',
+                'Apenas ADMINISTRADORES e GESTORES podem CRIAR CONTRATCS',
                 status = HTTP_400_BAD_REQUEST
             )'''
 
@@ -258,7 +249,7 @@ class ContractsViewSet(viewsets.ModelViewSet):
         '''user = Users.objects.filter(pk = request.user.id).first()
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
-                'Desculpe, apenas administradores podem deletar usuarios',
+                'Apenas ADNIMINADORES e GESTORES podem EDITAR CONTRATCS',
                 status = HTTP_400_BAD_REQUEST
             )'''
 
@@ -301,7 +292,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         '''user = Users.objects.filter(pk = request.user.id).first()
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
-                'Desculpe, apenas administradores podem deletar usuarios',  
+                'Desculpe, apenas administradores podem LISTAR  PAYMENTS',  
                 status = HTTP_400_BAD_REQUEST
             )'''
 
@@ -316,7 +307,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         '''user = Users.objects.filter(pk = request.user.id).first()
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
-                'Desculpe, apenas administradores podem LISTAR PROPERTYS',
+                'Desculpe, apenas administradores podem CRIAR PAYMENTS',
                 status = HTTP_400_BAD_REQUEST
             )'''
         
@@ -327,7 +318,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
                 status=HTTP_400_BAD_REQUEST
                 )
             
-        payment = create_payment(data)
+        payment = create_payment(data,request)
 
         serializer = self.get_serializer(payment)
         headers = self.get_success_headers(serializer.data)
@@ -344,7 +335,7 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         '''user = Users.objects.filter(pk = request.user.id).first()
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
-                'Desculpe, apenas administradores podem LISTAR PROPERTYS',
+                'Desculpe, apenas administradores podem LISTAR PAYMENTS',
                 status = HTTP_400_BAD_REQUEST
             )'''
 
@@ -356,9 +347,61 @@ class PaymentsViewSet(viewsets.ModelViewSet):
         '''user = Users.objects.filter(pk = request.user.id).first()
         if not request.user.is_authenticated or not user.is_admin:
             return Response(
-                'Desculpe, apenas administradores podem LISTAR PROPERTYS',
+                'Desculpe, apenas administradores podem EXCLUIR PAYMENTS',
                 status = HTTP_400_BAD_REQUEST
             )'''
 
         return super().destroy(request, *args, **kwargs)
 
+
+class RepasseViewSet(viewsets.ModelViewSet):
+    queryset = Repasse.objects.all()
+    serializer_class = RepasseSerializer
+
+    def list(self, request, *args, **kwargs):
+        
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem EXCLUIR PAYMENTS',
+                status = HTTP_400_BAD_REQUEST
+            )'''
+        
+        Repasse = Repasse.objects.all()
+
+        serializer = RepasseSerializer(Repasse, many=True)
+        return Response(serializer.data, status=HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        
+        '''user = Users.objects.filter(pk = request.user.id).first()
+        if not request.user.is_authenticated or not user.is_admin:
+            return Response(
+                'Desculpe, apenas administradores podem EXCLUIR PAYMENTS',
+                status = HTTP_400_BAD_REQUEST
+            )'''
+            
+        data = request.data
+
+        owner_id =  data.get('owner_id')
+        user = Users.objects.get(id=owner_id)
+        
+        payment_id= data.get('payment_id')
+        payment = Payments.objects.get(id=payment_id)
+        
+        repasse = Repasse.objects.create(
+            user_id= user.id,
+            Payments_id=payment.id,
+        )
+
+        value = payment.value
+        imobiliaria = value * 0.30
+        proprietario = value * 0.70
+
+        repasse.imobiliaria_value = imobiliaria
+        repasse.proprietario_value = proprietario
+
+        
+        serializer = self.get_serializer(repasse)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=HTTP_201_CREATED, headers=headers)

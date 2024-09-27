@@ -66,6 +66,11 @@ class Property(models.Model):
         
         )
     
+    rental_value = models.FloatField(
+        verbose_name = "Valor de aluguel", 
+        default = 0
+    )
+    
     name = models.CharField(
         verbose_name ="Nome", 
         max_length = 100
@@ -103,7 +108,7 @@ class Property(models.Model):
 
 class Contracts(models.Model):
     
-    user = models.ForeignKey(
+    tenant = models.ForeignKey(
         Users, 
         verbose_name = "inquilino",
         on_delete = models.DO_NOTHING
@@ -153,6 +158,10 @@ class Contracts(models.Model):
     rental_value = models.FloatField(
         verbose_name = "Valor de aluguel", 
         default = 0
+    )
+    taxa_imobiliaria = models.FloatField(
+        verbose_name = "Taxa da imobiliaria", 
+        default = 0.3
     )
     
     def __str__(self):
@@ -213,6 +222,12 @@ class Repasse (models.Model):
         verbose_name="Pagamento",
         on_delete=models.DO_NOTHING
     )
+    imobiliaria_value = models.FloatField(
+        default=0
+        )
+    proprietario_value = models.FloatField(
+        default=0
+        )
   
     def __str__(self):
         return self.user

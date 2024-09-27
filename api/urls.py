@@ -12,6 +12,8 @@ router.register(r'user', UsersViewSet, basename = 'user')
 router.register(r'property', PropertyViewSet, basename = 'property')
 router.register(r'contract', ContractsViewSet, basename = 'contract')
 router.register(r'payment', PaymentsViewSet, basename = 'payment')
+router.register(r'repasse', RepasseViewSet, basename = 'repasse')
+
 
 
 urlpatterns = [

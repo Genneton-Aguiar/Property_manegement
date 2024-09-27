@@ -5,8 +5,7 @@ class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = ('id', 'username','cpf', 'cnpj', 'email', 'telephone', 
-            'is_tenant', 'is_owner', 'is_admin', 'is_manager', 'is_operator',
-            'password')
+            'is_tenant', 'is_owner', 'is_admin', 'is_manager', 'is_operator')
 
 class PropertySerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,20 +17,21 @@ class PropertySerializer(serializers.ModelSerializer):
 class ContractsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contracts
-        fields = ('id', 'user_id', 'property_id', 'validity', 'start_date', 
+        fields = ('id', 'tenant_id', 'property_id', 'validity', 'start_date', 
                   'end_date', 'rental_value', 'adjustments', 'is_active', 
                   'compliant', 'defaulter')
         
 class PaymentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payments
-        fields = ('id', 'contratc_id', 'payed', 'payment_type',
+        fields = ('id', 'contract_id', 'payed', 'payment_type',
                   'value_payed', 'date')
 
 class RepasseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Repasse
-        fields = '__all__'
+        fields = ('user_id', 'payment_id', 'imobiliaria_value',
+                  'proprietario_value')
         
 
         

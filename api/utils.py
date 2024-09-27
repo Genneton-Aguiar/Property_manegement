@@ -36,8 +36,12 @@ def create_users(data):
         is_admin = admin,
         is_manager = manager,
         is_operator = operator,
-        password = password,
+        
     )
+
+    user.set_password(password)
+    user.save()
+    
     return user
 
 
@@ -54,6 +58,8 @@ def filter_users(users, request):
         if value is not None: 
             if value.lower() == 'true':  
                 users = users.filter(**{params: True})
+            elif value.lower() == 'false':  
+                users = users.filter(**{params: False})
     
     name = request.GET.get('username')
     if name:
@@ -62,7 +68,19 @@ def filter_users(users, request):
     cpf = request.GET.get('cpf')
     if cpf:
         users = users.filter(cpf=cpf)
- 
+         
+    telephone = request.GET.get('telephone')
+    if telephone:
+        users = users.filter(telephone__icontains=telephone)
+        
+    email = request.GET.get('email')
+    if email:
+        users = users.filter(email__icontains=email)
+        
+    cnpj = request.GET.get('cnpj')
+    if cnpj:
+        users = users.filter(cnpj__icontains=cnpj)
+
     return users
 
 
@@ -78,7 +96,6 @@ def create_property(data):
     property_type = data.get('property_type')
     room_number = data.get('room_number')
     parking_space = data.get('parking_space')
-    rental_value = data.get('rental_value')
     avaliable = data.get('avaliable')
     rented = data.get('rented')
     maintenance = data.get('maintenance')
@@ -90,7 +107,6 @@ def create_property(data):
         property_type = property_type,
         room_number = room_number,
         parking_space = parking_space,
-        rental_value = rental_value,
         avaliable = avaliable,
         rented = rented,
         maintenance = maintenance
@@ -98,10 +114,44 @@ def create_property(data):
     return property
 
 
+def filter_property(property, request):
+    
+        for params in [
+            'avaliable',
+            'rented',
+            'maintenance'
+            ]:
+            value = request.GET.get(params)
+            if value is not None: 
+                if value.lower() == 'true':  
+                    property = property.filter(**{params: True})
+                elif value.lower() == 'false':
+                    property = property.filter(**{params: False})
+        
+        for params in [
+            'room_number',
+            'parking_space',
+            ]:
+            value = request.GET.get(params)
+            if value is not None: 
+                property = property.filter(**{params + '__gte': float(value)})
+        
+        
+        owner_id = request.GET.get('owner_id')
+        if owner_id:
+                property = property.filter(owner_id=owner_id)
+                      
+        property_type = request.GET.get('property_type')
+        if property_type:
+                property = property.filter(property_type=property_type)
+
+        return property
+
+
 def filter_contracts(contracts, request):
     
     
-    params = ['user_id', 'property_id']
+    params = ['tenant_id', 'property_id']
     for param in params:
         value = request.GET.get(param)
         if value is not None: 
@@ -122,12 +172,16 @@ def filter_contracts(contracts, request):
         elif is_active.lower() == 'false':
             contracts = contracts.filter(is_active=False)
 
+    rental_value = request.GET.get('rental_value')
+    if rental_value is not None: 
+        contracts = contracts.filter(rental_value__gte=float(rental_value))
+        
     return contracts
 
 
 def create_contract(data):
 
-    user_id = data.get('user_id')  
+    user_id = data.get('tenant_id')  
     user = Users.objects.get(id=user_id)
     
     if not user.is_tenant:
@@ -173,7 +227,7 @@ def create_contract(data):
 
 def  create_payment(data, request):
     
-    contract_id = data.get('contracts_id')
+    contract_id = data.get('contract_id')
     contract = Contracts.objects.get(id=contract_id)
     
     payed= data.get('payed')
@@ -181,9 +235,7 @@ def  create_payment(data, request):
     value_payed = data.get('value_payed')
     date = data.get('date')
     
-    
     payment = Payments.objects.create(
-        user_id = request.user.id,
         contract_id = contract.id,
         payed = payed,
         payment_type = payment_type,
@@ -192,10 +244,10 @@ def  create_payment(data, request):
     )
 
     if not payed:
+        contract.is_active = False
         contract.defaulter = True
         contract.save()
         
     return payment
-
 
 
